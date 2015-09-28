@@ -8,7 +8,9 @@ import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -22,8 +24,9 @@ import eu.scasefp7.eclipse.reqeditor.helpers.RQSHelpers;
  * 
  * @author themis
  */
-public class ExportToOntologyHandler extends AbstractHandler {
-
+public class ExportToOntologyHandler extends AbstractHandler  {
+	
+	
 	/**
 	 * This function is called when the user selects the menu item. It reads the selected resource(s) and populates the
 	 * static ontology.
@@ -37,12 +40,20 @@ public class ExportToOntologyHandler extends AbstractHandler {
 		if (selection instanceof IStructuredSelection) {
 			IStructuredSelection structuredSelection = (IStructuredSelection) selection;
 			List<Object> selectionList = structuredSelection.toList();
+			
+				
 			// Iterate over the selected files
 			for (Object object : selectionList) {
 				IFile file = (IFile) Platform.getAdapterManager().getAdapter(object, IFile.class);
 				if (file == null) {
 					if (object instanceof IAdaptable) {
 						file = (IFile) ((IAdaptable) object).getAdapter(IFile.class);
+						String fileName = event.getParameter("fileName");
+						//When handler is called from builder
+						if(fileName != null){
+							Path path = new Path(fileName);
+						    file = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
+						}
 					}
 				}
 				if (file != null) {
@@ -110,4 +121,6 @@ public class ExportToOntologyHandler extends AbstractHandler {
 		}
 		return null;
 	}
+
+	
 }

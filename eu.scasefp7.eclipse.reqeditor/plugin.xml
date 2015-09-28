@@ -97,7 +97,16 @@
       <category id="eu.scasefp7.eclipse.reqeditor.commands.category" name="SCaseReqEditor Commands Category"/>
       <command categoryId="eu.scasefp7.eclipse.reqeditor.commands.category" id="eu.scasefp7.eclipse.reqeditor.commands.clearAnnotations" name="Clear all annotations"/>
       <command categoryId="eu.scasefp7.eclipse.reqeditor.commands.category" id="eu.scasefp7.eclipse.reqeditor.commands.autoAnnotate" name="Auto annotate"/>
-      <command categoryId="eu.scasefp7.eclipse.reqeditor.commands.category" id="eu.scasefp7.eclipse.reqeditor.commands.exportToOntology" name="Export to ontology"/>
+      <command
+            categoryId="eu.scasefp7.eclipse.reqeditor.commands.category"
+            id="eu.scasefp7.eclipse.reqeditor.commands.exportToOntology"
+            name="Export to ontology">
+         <commandParameter
+               id="fileName"
+               name="name"
+               optional="true">
+         </commandParameter>
+      </command>
    </extension>
 
    <extension point="org.eclipse.ui.handlers">
@@ -142,14 +151,57 @@
    <extension point="org.eclipse.ui.handlers">
       <handler class="eu.scasefp7.eclipse.reqeditor.handlers.ExportToOntologyHandler" commandId="eu.scasefp7.eclipse.reqeditor.commands.exportToOntology">
       	<enabledWhen>
-   			<with variable="selection">
-    			<iterate ifEmpty="false">
-     				<adapt type="org.eclipse.core.resources.IResource">
-         				<test property="org.eclipse.core.resources.name" value="*.rqs" />
-        			</adapt>
-    			</iterate>
-           </with>
+          <or>
+             <with
+                   variable="selection">
+                <iterate
+                      ifEmpty="false">
+                   <adapt
+                         type="org.eclipse.core.resources.IResource">
+                      <test
+                            property="org.eclipse.core.resources.name"
+                            value="*.rqs">
+                      </test>
+                   </adapt>
+                </iterate>
+             </with>
+             <adapt
+                   type="org.eclipse.core.resources.IResource">
+                <test
+                      property="org.eclipse.core.resources.name"
+                      value="*.rqs">
+                </test>
+             </adapt>
+          </or>
       	</enabledWhen>
+      </handler>
+      <handler
+            class="eu.scasefp7.eclipse.reqeditor.handlers.ExportToOntologyHandler"
+            commandId="eu.scasefp7.eclipse.core.commands.compileToOntology">
+         <enabledWhen>
+            <or>
+               <with
+                     variable="selection">
+                  <iterate
+                        ifEmpty="false">
+                     <adapt
+                           type="org.eclipse.core.resources.IResource">
+                        <test
+                              property="org.eclipse.core.resources.name"
+                              value="*.rqs">
+                        </test>
+                     </adapt>
+                  </iterate>
+               </with>
+               <adapt
+                     type="org.eclipse.core.resources.IResource">
+                  <test
+                        property="org.eclipse.core.resources.name"
+                        value="*.rqs">
+                  </test>
+               </adapt>
+            </or>
+         </enabledWhen>
       </handler>
    </extension>
    <extension

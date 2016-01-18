@@ -12,7 +12,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.editors,
  org.eclipse.ui.ide,
  eu.scasefp7.eclipse.core;bundle-version="[1.0.2,2.0.0)",
- com.googlecode.json-simple;bundle-version="1.1.1"
+ com.googlecode.json-simple;bundle-version="1.1.1",
+ com.google.inject
 Bundle-ClassPath: .
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
@@ -24,3 +25,6 @@ Export-Package: eu.scasefp7.eclipse.reqeditor,
  eu.scasefp7.eclipse.reqeditor.ui.annotationseditor,
  eu.scasefp7.eclipse.reqeditor.ui.requirementseditor,
  eu.scasefp7.eclipse.reqeditor.wizards
+Import-Package: eu.scasefp7.eclipse.reqeditor.dsl.ui.internal,
+ org.eclipse.emf.mwe.internal.core.ast.util,
+ org.eclipse.xtext.ui.editor

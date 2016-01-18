@@ -6,6 +6,7 @@ import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
+//import org.eclipse.emf.mwe.internal.core.ast.util.Injector;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
@@ -14,9 +15,12 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.*;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.part.MultiPageEditorPart;
+import org.eclipse.xtext.ui.editor.XtextEditor;
 import org.eclipse.ui.editors.text.TextEditor;
 import org.eclipse.ui.ide.IDE;
+import com.google.inject.Injector;
 
+import eu.scasefp7.eclipse.reqeditor.dsl.ui.internal.RqsDslActivator;
 import eu.scasefp7.eclipse.reqeditor.ui.RequirementsReader;
 import eu.scasefp7.eclipse.reqeditor.ui.SBDPhrasesReader;
 import eu.scasefp7.eclipse.reqeditor.ui.UMLPhrasesReader;
@@ -54,6 +58,8 @@ public class MyReqEditor extends MultiPageEditorPart implements IResourceChangeL
 	 * Boolean denoting whether the file to be annotated is an rqs or not.
 	 */
 	private boolean isRQS;
+
+	private XtextEditor xtextEditor;
 
 	/**
 	 * Initializes this object and creates the {@code editor} and the {@code reader}.
@@ -111,6 +117,38 @@ public class MyReqEditor extends MultiPageEditorPart implements IResourceChangeL
 		else
 			setPageText(index, "Annotated Phrases");
 	}
+	
+	/**
+	 * Creates the page for the Xtext editor.
+	 */
+	void createPage3() {
+		Composite composite = new Composite(getContainer(), SWT.NONE);
+		FillLayout layout = new FillLayout();
+		composite.setLayout(layout);
+
+		Injector myInjector = RqsDslActivator.getInstance().getInjector(
+				 "eu.scasefp7.eclipse.reqeditor.dsl.RqsDsl");
+		xtextEditor = myInjector.getInstance(XtextEditor.class);
+		IEditorSite site = createSite(editor);
+		
+		try {
+			xtextEditor.init(site, getEditorInput());
+		} catch (PartInitException e) {
+			e.printStackTrace();
+		}
+		
+		int index = 0;
+		try {
+			index = addPage(xtextEditor, getEditorInput());
+		} catch (PartInitException e) {
+			e.printStackTrace();
+		}
+		
+		if (isRQS)
+			setPageText(index, "Requirements");
+		else
+			setPageText(index, "Phrases");
+	}
 
 	/**
 	 * Creates the pages of this multi-page editor.
@@ -119,6 +157,7 @@ public class MyReqEditor extends MultiPageEditorPart implements IResourceChangeL
 		createPage0();
 		createPage1();
 		createPage2();
+		createPage3();
 	}
 
 	/**
@@ -134,6 +173,7 @@ public class MyReqEditor extends MultiPageEditorPart implements IResourceChangeL
 	 */
 	public void doSave(IProgressMonitor monitor) {
 		editor.doSave(monitor);
+		xtextEditor.doSave(monitor);
 	}
 
 	/**
@@ -141,6 +181,7 @@ public class MyReqEditor extends MultiPageEditorPart implements IResourceChangeL
 	 */
 	public void doSaveAs() {
 		editor.doSaveAs();
+		xtextEditor.doSaveAs();
 	}
 
 	/**
@@ -207,6 +248,9 @@ public class MyReqEditor extends MultiPageEditorPart implements IResourceChangeL
 		if (newPageIndex == 1) {
 			annotationsEditor.setTextAndAnnotations(reader);
 		}
+		if (newPageIndex == 2) {
+			//TODO
+		}
 	}
 
 	/**
@@ -225,6 +269,10 @@ public class MyReqEditor extends MultiPageEditorPart implements IResourceChangeL
 							IEditorPart editorPart = pages[i].findEditor(editor.getEditorInput());
 							pages[i].closeEditor(editorPart, true);
 						}
+						if(i==2) {
+							IEditorPart editorPart = pages[i].findEditor(xtextEditor.getEditorInput());
+                            pages[i].closeEditor(editorPart, true);
+						}
 					}
 				}
 			});
@@ -237,8 +285,15 @@ public class MyReqEditor extends MultiPageEditorPart implements IResourceChangeL
 						public void run() {
 							IWorkbenchPage[] pages = getSite().getWorkbenchWindow().getPages();
 							for (int i = 0; i < pages.length; i++) {
-								IEditorPart editorPart = pages[i].findEditor(editor.getEditorInput());
-								pages[i].closeEditor(editorPart, true);
+								if(i==2) {
+									IEditorPart editorPart = pages[i].findEditor(xtextEditor.getEditorInput());
+		                            pages[i].closeEditor(editorPart, true);
+								}
+								else{
+									IEditorPart editorPart = pages[i].findEditor(editor.getEditorInput());
+									pages[i].closeEditor(editorPart, true);
+								}
+								
 							}
 						}
 					});

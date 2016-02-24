@@ -7,7 +7,9 @@ import java.util.List;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -42,6 +44,12 @@ public class ExportToOntologyHandler extends ProjectAwareHandler {
 				if (file == null) {
 					if (object instanceof IAdaptable) {
 						file = (IFile) ((IAdaptable) object).getAdapter(IFile.class);
+						String fileName = event.getParameter("fileName");
+						//When handler is called from builder
+						if(fileName != null){
+							Path path = new Path(fileName);
+						    file = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
+						}
 					}
 				}
 				if (file != null) {

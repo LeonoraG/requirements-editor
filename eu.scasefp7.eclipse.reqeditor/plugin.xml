@@ -152,6 +152,13 @@
       <handler class="eu.scasefp7.eclipse.reqeditor.handlers.ExportToOntologyHandler" commandId="eu.scasefp7.eclipse.reqeditor.commands.exportToOntology">
       	<enabledWhen>
           <or>
+             <adapt
+                   type="org.eclipse.core.resources.IResource">
+                <test
+                      property="fileName"
+                      value="*.rqs">
+                </test>
+             </adapt>
              <with
                    variable="selection">
                 <iterate
@@ -165,13 +172,6 @@
                    </adapt>
                 </iterate>
              </with>
-             <adapt
-                   type="org.eclipse.core.resources.IResource">
-                <test
-                      property="org.eclipse.core.resources.name"
-                      value="*.rqs">
-                </test>
-             </adapt>
           </or>
       	</enabledWhen>
       </handler>

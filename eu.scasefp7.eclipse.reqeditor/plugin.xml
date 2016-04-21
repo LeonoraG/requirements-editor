@@ -96,7 +96,12 @@
    <extension point="org.eclipse.ui.commands">
       <category id="eu.scasefp7.eclipse.reqeditor.commands.category" name="SCaseReqEditor Commands Category"/>
       <command categoryId="eu.scasefp7.eclipse.reqeditor.commands.category" id="eu.scasefp7.eclipse.reqeditor.commands.clearAnnotations" name="Clear all annotations"/>
+      <command categoryId="eu.scasefp7.eclipse.reqeditor.commands.category" id="eu.scasefp7.eclipse.reqeditor.commands.clearAnnotationsSBD" name="Clear all annotations"/>
+      <command categoryId="eu.scasefp7.eclipse.reqeditor.commands.category" id="eu.scasefp7.eclipse.reqeditor.commands.clearAnnotationsUML" name="Clear all annotations"/>
       <command categoryId="eu.scasefp7.eclipse.reqeditor.commands.category" id="eu.scasefp7.eclipse.reqeditor.commands.autoAnnotate" name="Auto annotate"/>
+      <command categoryId="eu.scasefp7.eclipse.reqeditor.commands.category" id="eu.scasefp7.eclipse.reqeditor.commands.annotateSBDDiagramInstances" name="Annotate Diagram Instances"/>
+      <command categoryId="eu.scasefp7.eclipse.reqeditor.commands.category" id="eu.scasefp7.eclipse.reqeditor.commands.autoAnnotateSBD" name="Auto annotate diagram instances"/>
+      <command categoryId="eu.scasefp7.eclipse.reqeditor.commands.category" id="eu.scasefp7.eclipse.reqeditor.commands.autoAnnotateUML" name="Auto annotate diagram instances"/>
       <command
             categoryId="eu.scasefp7.eclipse.reqeditor.commands.category"
             id="eu.scasefp7.eclipse.reqeditor.commands.exportToOntology"
@@ -107,6 +112,7 @@
                optional="true">
          </commandParameter>
       </command>
+      <command categoryId="eu.scasefp7.eclipse.reqeditor.commands.category" id="eu.scasefp7.eclipse.reqeditor.commands.exportAllToOntology" name="Export all requirements to ontology"/>
    </extension>
 
    <extension point="org.eclipse.ui.handlers">
@@ -129,6 +135,72 @@
    </extension>
 
    <extension point="org.eclipse.ui.handlers">
+      <handler class="eu.scasefp7.eclipse.reqeditor.handlers.ClearAllAnnotationsSBDHandler" commandId="eu.scasefp7.eclipse.reqeditor.commands.clearAnnotationsSBD"/>
+   </extension>
+   <extension point="org.eclipse.ui.menus">
+      <menuContribution locationURI="popup:org.eclipse.ui.popup.any">
+            <command commandId="eu.scasefp7.eclipse.reqeditor.commands.clearAnnotationsSBD" id="eu.scasefp7.eclipse.reqeditor.menus.clearAnnotationsSBD" icon="icons/sample.gif">
+                  <visibleWhen>
+				           <with variable="activeMenuSelection">
+				            <iterate ifEmpty="false">
+				             <adapt type="org.eclipse.core.resources.IResource">
+				               <test property="org.eclipse.core.resources.name" value="*sbd" />
+				             </adapt>
+				            </iterate>
+				           </with>
+                  </visibleWhen>
+            </command>
+      </menuContribution>
+   </extension>
+
+   <extension point="org.eclipse.ui.handlers">
+      <handler class="eu.scasefp7.eclipse.reqeditor.handlers.ClearAllAnnotationsUMLHandler" commandId="eu.scasefp7.eclipse.reqeditor.commands.clearAnnotationsUML"/>
+   </extension>
+   <extension point="org.eclipse.ui.menus">
+      <menuContribution locationURI="popup:org.eclipse.ui.popup.any">
+            <command commandId="eu.scasefp7.eclipse.reqeditor.commands.clearAnnotationsUML" id="eu.scasefp7.eclipse.reqeditor.menus.clearAnnotationsUML" icon="icons/sample.gif">
+                  <visibleWhen>
+				           <with variable="activeMenuSelection">
+				            <iterate ifEmpty="false">
+				             <adapt type="org.eclipse.core.resources.IResource">
+				               <test property="org.eclipse.core.resources.name" value="*uml" />
+				             </adapt>
+				            </iterate>
+				           </with>
+                  </visibleWhen>
+            </command>
+      </menuContribution>
+   </extension>
+
+   <extension point="org.eclipse.ui.handlers">
+      <handler class="eu.scasefp7.eclipse.reqeditor.handlers.AnnotateSBDDiagramInstancesHandler" commandId="eu.scasefp7.eclipse.reqeditor.commands.annotateSBDDiagramInstances"/>
+   </extension>
+   <extension point="org.eclipse.ui.menus">
+      <menuContribution locationURI="popup:org.eclipse.ui.popup.any">
+            <command commandId="eu.scasefp7.eclipse.reqeditor.commands.annotateSBDDiagramInstances" id="eu.scasefp7.eclipse.reqeditor.menus.annotateSBDDiagramInstances" icon="icons/sample.gif">
+                  <visibleWhen>
+				           <with variable="activeMenuSelection">
+				            <iterate ifEmpty="false">
+				             <adapt type="org.eclipse.core.resources.IResource">
+			                   <or>
+			                      <test
+			                            property="org.eclipse.core.resources.name"
+			                            value="*sbd">
+			                      </test>
+			                      <test
+			                            property="org.eclipse.core.resources.name"
+			                            value="*uml">
+			                      </test>
+			                   </or>
+				             </adapt>
+				            </iterate>
+				           </with>
+                  </visibleWhen>
+            </command>
+      </menuContribution>
+   </extension>
+
+   <extension point="org.eclipse.ui.handlers">
       <handler class="eu.scasefp7.eclipse.reqeditor.handlers.AutoAnnotateHandler" commandId="eu.scasefp7.eclipse.reqeditor.commands.autoAnnotate"/>
    </extension>
    <extension
@@ -140,6 +212,46 @@
 				            <iterate ifEmpty="false">
 				             <adapt type="org.eclipse.core.resources.IResource">
 				               <test property="org.eclipse.core.resources.name" value="*rqs" />
+				             </adapt>
+				            </iterate>
+				           </with>
+                  </visibleWhen>
+            </command>
+      </menuContribution>
+   </extension>
+
+   <extension point="org.eclipse.ui.handlers">
+      <handler class="eu.scasefp7.eclipse.reqeditor.handlers.AutoAnnotateSBDHandler" commandId="eu.scasefp7.eclipse.reqeditor.commands.autoAnnotateSBD"/>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution locationURI="popup:org.eclipse.ui.popup.any">
+            <command commandId="eu.scasefp7.eclipse.reqeditor.commands.autoAnnotateSBD" id="eu.scasefp7.eclipse.reqeditor.menus.autoAnnotateSBD" icon="icons/sample.gif">
+                  <visibleWhen>
+				           <with variable="activeMenuSelection">
+				            <iterate ifEmpty="false">
+				             <adapt type="org.eclipse.core.resources.IResource">
+				               <test property="org.eclipse.core.resources.name" value="*sbd" />
+				             </adapt>
+				            </iterate>
+				           </with>
+                  </visibleWhen>
+            </command>
+      </menuContribution>
+   </extension>
+
+   <extension point="org.eclipse.ui.handlers">
+      <handler class="eu.scasefp7.eclipse.reqeditor.handlers.AutoAnnotateUMLHandler" commandId="eu.scasefp7.eclipse.reqeditor.commands.autoAnnotateUML"/>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution locationURI="popup:org.eclipse.ui.popup.any">
+            <command commandId="eu.scasefp7.eclipse.reqeditor.commands.autoAnnotateUML" id="eu.scasefp7.eclipse.reqeditor.menus.autoAnnotateUML" icon="icons/sample.gif">
+                  <visibleWhen>
+				           <with variable="activeMenuSelection">
+				            <iterate ifEmpty="false">
+				             <adapt type="org.eclipse.core.resources.IResource">
+				               <test property="org.eclipse.core.resources.name" value="*uml" />
 				             </adapt>
 				            </iterate>
 				           </with>
@@ -175,39 +287,25 @@
           </or>
       	</enabledWhen>
       </handler>
-      <handler
-            class="eu.scasefp7.eclipse.reqeditor.handlers.ExportToOntologyHandler"
-            commandId="eu.scasefp7.eclipse.core.commands.compileToOntology">
-         <enabledWhen>
-            <or>
-               <with
-                     variable="selection">
-                  <iterate
-                        ifEmpty="false">
-                     <adapt
-                           type="org.eclipse.core.resources.IResource">
-                        <test
-                              property="org.eclipse.core.resources.name"
-                              value="*.rqs">
-                        </test>
-                     </adapt>
-                  </iterate>
-               </with>
-               <adapt
-                     type="org.eclipse.core.resources.IResource">
-                  <test
-                        property="org.eclipse.core.resources.name"
-                        value="*.rqs">
-                  </test>
-               </adapt>
-            </or>
-         </enabledWhen>
-      </handler>
+      <handler class="eu.scasefp7.eclipse.reqeditor.handlers.ExportAllRQSToOntologyHandler" commandId="eu.scasefp7.eclipse.reqeditor.commands.exportAllToOntology"/>
    </extension>
    <extension
          point="org.eclipse.ui.menus">
       <menuContribution locationURI="popup:org.eclipse.ui.popup.any">
             <command commandId="eu.scasefp7.eclipse.reqeditor.commands.exportToOntology" id="eu.scasefp7.eclipse.reqeditor.menus.exportToOntology" icon="icons/sample.gif">
+                  <visibleWhen>
+				           <with variable="activeMenuSelection">
+				            <iterate ifEmpty="false">
+				             <adapt type="org.eclipse.core.resources.IResource">
+				               <test property="org.eclipse.core.resources.name" value="*rqs" />
+				             </adapt>
+				            </iterate>
+				           </with>
+                  </visibleWhen>
+            </command>
+      </menuContribution>
+      <menuContribution locationURI="popup:org.eclipse.ui.popup.any">
+            <command commandId="eu.scasefp7.eclipse.reqeditor.commands.exportAllToOntology" id="eu.scasefp7.eclipse.reqeditor.menus.exportAllToOntology" icon="icons/sample.gif">
                   <visibleWhen>
 				           <with variable="activeMenuSelection">
 				            <iterate ifEmpty="false">

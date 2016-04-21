@@ -14,8 +14,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.ui.editors.text.TextEditor;
 
+import eu.scasefp7.eclipse.reqeditor.Activator;
 import eu.scasefp7.eclipse.reqeditor.helpers.MyProgressMonitor;
 import eu.scasefp7.eclipse.reqeditor.ui.annotationseditor.IdHashMap;
 
@@ -156,6 +158,14 @@ public class RequirementsReader {
 			annotations = new ArrayList<Annotation>();
 			rannotations = new IdHashMap<RAnnotation>("R");
 			tannotations = new IdHashMap<TAnnotation>("T");
+
+			// Reset the document before parsing it to ensure the latest changes are included
+			try {
+				editor.getDocumentProvider().resetDocument(editor.getEditorInput());
+			} catch (CoreException e) {
+				Activator.log("Error in resetting the editor", e);
+			}
+
 			InputStream stringstream = new ByteArrayInputStream(editor.getDocumentProvider()
 					.getDocument(editor.getEditorInput()).get().getBytes(StandardCharsets.UTF_8));
 			parseData(stringstream);

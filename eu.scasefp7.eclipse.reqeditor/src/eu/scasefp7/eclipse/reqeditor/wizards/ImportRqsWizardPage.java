@@ -17,19 +17,28 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.ui.IEditorDescriptor;
 import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.ui.dialogs.FileSystemElement;
 import org.eclipse.ui.internal.wizards.datatransfer.WizardFileSystemResourceImportPage1;
+import org.eclipse.ui.part.FileEditorInput;
+
+import eu.scasefp7.eclipse.reqeditor.Activator;
+import eu.scasefp7.eclipse.reqeditor.helpers.ProjectLocator;
 
 /**
  * The "Import" wizard page that allows importing rqs files.
@@ -49,6 +58,22 @@ public class ImportRqsWizardPage extends WizardFileSystemResourceImportPage1 {
 		super(workbench, selection);
 		setTitle("Requirements Editor Import Wizard");
 		setDescription("Select your requirements file to import");
+		if (selection != null && selection.isEmpty() == false && selection instanceof IStructuredSelection) {
+			IProject project = ProjectLocator.getProjectOfSelectionList((IStructuredSelection) selection);
+			String requirementsFolderLocation = null;
+			try {
+				requirementsFolderLocation = project.getPersistentProperty(new QualifiedName("",
+						"eu.scasefp7.eclipse.core.ui.rqsFolder"));
+			} catch (CoreException e) {
+				Activator.log("Error retrieving project property (requirements folder location)", e);
+			}
+			IContainer container = project;
+			if (requirementsFolderLocation != null) {
+				if (project.findMember(new Path(requirementsFolderLocation)).exists())
+					container = (IContainer) project.findMember(new Path(requirementsFolderLocation));
+			}
+			setContainerFieldValue(container.getFullPath().toString());
+		}
 	}
 
 	/**
@@ -94,9 +119,9 @@ public class ImportRqsWizardPage extends WizardFileSystemResourceImportPage1 {
 						}
 						brlocal.close();
 					} catch (FileNotFoundException e) {
-						e.printStackTrace();
+						Activator.log("Error when reading an rqs from the file system to import it", e);
 					} catch (IOException e) {
-						e.printStackTrace();
+						Activator.log("Error when reading an rqs from the file system to import it", e);
 					}
 					String filedata = "";
 					for (String dataline : datalines) {
@@ -105,22 +130,22 @@ public class ImportRqsWizardPage extends WizardFileSystemResourceImportPage1 {
 					InputStream stream = new ByteArrayInputStream(filedata.getBytes(StandardCharsets.UTF_8));
 					IPath resourcePath = getResourcePath();
 					IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-					IProject project = root.getProject(resourcePath.toString());
-					project.getFile(fileName).create(stream, true, monitor);
+					IContainer container = (IContainer) root.findMember(resourcePath);
+					container.getFile(new Path(fileName)).create(stream, true, monitor);
+
+					IEditorDescriptor desc = PlatformUI.getWorkbench().getEditorRegistry()
+							.getDefaultEditor(file.getName());
+					IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+					page.openEditor(new FileEditorInput(container.getFile(new Path(fileName))), desc.getId());
 				}
 			};
 			try {
 				getContainer().run(false, true, op);
 			} catch (InterruptedException e) {
+				Activator.log("Error importing an rqs file", e);
 				return false;
 			} catch (InvocationTargetException e) {
-				if (e.getTargetException() instanceof CoreException) {
-					ErrorDialog.openError(getContainer().getShell(), "Error in file creation", null,
-							((CoreException) e.getTargetException()).getStatus());
-					System.out.println("Error in file creation");
-				} else {
-					System.out.println("Error creating file");
-				}
+				Activator.log("Error importing an rqs file", e);
 				return false;
 			}
 		}

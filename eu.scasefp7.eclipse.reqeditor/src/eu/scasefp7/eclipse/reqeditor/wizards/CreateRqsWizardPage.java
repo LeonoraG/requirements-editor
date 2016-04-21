@@ -1,9 +1,12 @@
 package eu.scasefp7.eclipse.reqeditor.wizards;
 
 import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.WizardPage;
@@ -19,6 +22,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.ContainerSelectionDialog;
+
+import eu.scasefp7.eclipse.reqeditor.Activator;
+import eu.scasefp7.eclipse.reqeditor.helpers.ProjectLocator;
 
 /**
  * The "New" wizard page that allows setting the container for the new file as well as the file name.
@@ -103,18 +109,20 @@ public class CreateRqsWizardPage extends WizardPage {
 	 */
 	private void initialize() {
 		if (selection != null && selection.isEmpty() == false && selection instanceof IStructuredSelection) {
-			IStructuredSelection ssel = (IStructuredSelection) selection;
-			if (ssel.size() > 1)
-				return;
-			Object obj = ssel.getFirstElement();
-			if (obj instanceof IResource) {
-				IContainer container;
-				if (obj instanceof IContainer)
-					container = (IContainer) obj;
-				else
-					container = ((IResource) obj).getParent();
-				containerText.setText(container.getFullPath().toString());
+			IProject project = ProjectLocator.getProjectOfSelectionList((IStructuredSelection) selection);
+			String requirementsFolderLocation = null;
+			try {
+				requirementsFolderLocation = project.getPersistentProperty(new QualifiedName("",
+						"eu.scasefp7.eclipse.core.ui.rqsFolder"));
+			} catch (CoreException e) {
+				Activator.log("Error retrieving project property (requirements folder location)", e);
 			}
+			IContainer container = project;
+			if (requirementsFolderLocation != null) {
+				if (project.findMember(new Path(requirementsFolderLocation)).exists())
+					container = (IContainer) project.findMember(new Path(requirementsFolderLocation));
+			}
+			containerText.setText(container.getFullPath().toString());
 		}
 		fileText.setText("new_file.rqs");
 	}
@@ -170,7 +178,8 @@ public class CreateRqsWizardPage extends WizardPage {
 			setErrorMessage("File name already exists");
 			setPageComplete(false);
 			return;
-		};
+		}
+		;
 		int dotLoc = fileName.lastIndexOf('.');
 		if (dotLoc != -1) {
 			String ext = fileName.substring(dotLoc + 1);
